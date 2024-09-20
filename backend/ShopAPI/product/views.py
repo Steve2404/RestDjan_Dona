@@ -8,10 +8,14 @@ from .serializers import ProductSerializers
 
 
 @api_view(['GET', 'POST'])
-def api_view(request):
-    if query := Product.objects.all().order_by('?').first():
-        #data = model_to_dict(query, fields=['name', 'content', 'price', 'get_discount'])
-        data = ProductSerializers(query).data
+def api_view(request):  # sourcery skip: assign-if-exp, reintroduce-else
+    
+    
+    serializer = ProductSerializers(data=request.data)
+    # print(f"data: {serializer}")
+    if serializer.is_valid(raise_exception=True):
+        serializer.save()
+        return Response(serializer.data)
     else:
-        data = {}
-    return Response(data)
+        return Response({'datail': 'Invalid data'})
+  
