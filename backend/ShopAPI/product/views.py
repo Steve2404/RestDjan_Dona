@@ -8,11 +8,11 @@ from rest_framework import generics
 
 
 
-class DetailApiView(generics.RetrieveAPIView):
+class DetailProductView(generics.RetrieveAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializers
 
-class CreateApiView(generics.CreateAPIView): 
+class CreateProductView(generics.CreateAPIView): 
      queryset = Product.objects.all()
      serializer_class = ProductSerializers
      def perform_create(self, serializer):
@@ -23,3 +23,17 @@ class CreateApiView(generics.CreateAPIView):
          
          serializer.save(content=content)
 
+class UpdateProductView(generics.UpdateAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializers
+    def perform_update(self, serializer): 
+        name = serializer.validated_data.get('name')
+        content = serializer.validate_data.get('content') or None
+        if content is None: 
+            content = name
+            
+        serializer.save(content=content)
+        
+class DeleteProductView(generics.DestroyAPIView):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializers
