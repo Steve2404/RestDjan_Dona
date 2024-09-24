@@ -6,6 +6,7 @@ from rest_framework.decorators import api_view
 from .serializers import ProductSerializers
 from rest_framework import generics, mixins, permissions, authentication
 from .permissions import IsStaffPermission
+from .authentication import TokenAuthentication
 
 
 
@@ -57,7 +58,8 @@ class ProductMixinsViews(
     queryset = Product.objects.all()
     serializer_class = ProductSerializers
     permission_classes = [permissions.IsAdminUser, IsStaffPermission]
-    authentication_classes = [authentication.SessionAuthentication]
+    authentication_classes = [authentication.SessionAuthentication, 
+                              TokenAuthentication]
     def perform_update(self, serializer): 
         name = serializer.validated_data.get('name')
         content = serializer.validated_data.get('content') or None

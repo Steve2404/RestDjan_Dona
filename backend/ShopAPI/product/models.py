@@ -1,6 +1,15 @@
 from django.db import models
+from rest_framework.authtoken.models import Token as Tokenn
+from django.utils import timezone
+from datetime import timedelta
 
-# Create your models here.
+
+class Token(Tokenn):
+    expiry_date = models.DateTimeField(default=timezone.now() + timedelta(days=1)) 
+    
+    def is_expired(self):
+        return timezone.now() > self.expiry_date
+
 
 class Product(models.Model):
     name = models.CharField(max_length=100)

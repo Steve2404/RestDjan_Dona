@@ -1,4 +1,5 @@
 from django.urls import path
+from rest_framework.authtoken.views import obtain_auth_token
 
 from .views import DetailProductView, CreateProductView,\
 ListProductView, UpdateProductView, DeleteProductView, ProductMixinsViews
@@ -15,6 +16,7 @@ urlpatterns = [
     path('<int:pk>/update', ProductMixinsViews.as_view()),
     path('<int:pk>/delete', ProductMixinsViews.as_view()),
     path('liste/', ProductMixinsViews.as_view()),
+    path('auth/', obtain_auth_token)
     
     
     
