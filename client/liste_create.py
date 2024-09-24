@@ -1,6 +1,6 @@
 import requests
 
-endpoint = "http://127.0.0.1:8000/product/4/detail"
+endpoint = "http://127.0.0.1:8000/product/liste"
 response = requests.get(endpoint)
 print(response.json())
 print(response.status_code)

@@ -7,6 +7,8 @@ class Product(models.Model):
     content = models.TextField(blank=True)
     price = models.DecimalField(max_digits=15, decimal_places=2)
     
+    def __str__(self):
+        return self.name
     
     def get_discount(self):
         return "%.2f"%(float(self.price) * 0.5)
