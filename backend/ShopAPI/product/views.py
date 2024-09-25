@@ -1,13 +1,16 @@
-from .models import Product
+from .models import Product, TokenExtension
 from django.forms.models import model_to_dict
 
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
 from .serializers import ProductSerializers
 from rest_framework import generics, mixins, permissions, authentication
 from .permissions import IsStaffPermission
 from .authentication import TokenAuthentication
-
+from rest_framework.authtoken.views import ObtainAuthToken
+from .models import Token
+from rest_framework.response import Response
+from django.utils import timezone
+from datetime import timedelta
 
 
 class DetailProductView(generics.RetrieveAPIView):
@@ -46,7 +49,45 @@ class ListProductView(generics.ListAPIView):
     
     def get_queryset(self):
         return super().get_queryset().filter(name__icontains='Banane')
-    
+ 
+
+
+class CustomAuthToken(ObtainAuthToken):
+    def post(self, request, *args, **kwargs):
+        # Authentification de l'utilisateur
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+
+       # Vérifier si un token existe déjà pour cet utilisateur
+        token = Token.objects.filter(user=user).first()
+
+        if token:
+            # Vérifier si l'extension de token existe
+            try:
+                extension = token.extension
+            except TokenExtension.DoesNotExist:
+                # Si l'extension n'existe pas, la créer
+                extension = TokenExtension.objects.create(token=token, expiry_date=timezone.now() + timedelta(days=1))
+            
+            # Vérifier si le token est expiré
+            if extension.is_expired():
+                # Si le token est expiré, le supprimer et en créer un nouveau
+                token.delete()
+                token = Token.objects.create(user=user)
+                # Créer une nouvelle extension pour le nouveau token
+                extension = TokenExtension.objects.create(token=token, expiry_date=timezone.now() + timedelta(days=1))
+        else:
+            # Si aucun token n'existe, en créer un nouveau
+            token = Token.objects.create(user=user)
+            # Créer une extension pour ce nouveau token
+            extension = TokenExtension.objects.create(token=token, expiry_date=timezone.now() + timedelta(days=1))
+
+        return Response({
+            'token': token.key,
+            'expiry_date': extension.expiry_date.isoformat(),
+        })
+       
 class ProductMixinsViews(
         generics.GenericAPIView,
         mixins.CreateModelMixin,

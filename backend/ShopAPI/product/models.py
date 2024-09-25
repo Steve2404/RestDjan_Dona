@@ -1,14 +1,21 @@
 from django.db import models
-from rest_framework.authtoken.models import Token as Tokenn
+from rest_framework.authtoken.models import Token 
 from django.utils import timezone
 from datetime import timedelta
 
 
-class Token(Tokenn):
-    expiry_date = models.DateTimeField(default=timezone.now() + timedelta(days=1)) 
-    
+class TokenExtension(models.Model):
+    token = models.OneToOneField(Token, on_delete=models.CASCADE, related_name='extension')
+    expiry_date = models.DateTimeField(default=timezone.now() + timedelta(days=1))
+
     def is_expired(self):
-        return timezone.now() > self.expiry_date
+        if timezone.now() < self.expiry_date:
+            remaining_time = self.expiry_date - timezone.now()
+            remaining_minutes = remaining_time.total_seconds() / 60  
+            print(f"Il te reste encore: {remaining_minutes:.2f} minutes")
+            return False
+        print("Depasser")
+        return True
 
 
 class Product(models.Model):
