@@ -12,7 +12,7 @@ urlpatterns = [
    # path('liste/', ListProductView.as_view()),
    # path('mixins/', ProductMixinsViews.as_view()),
     path('create/', ProductMixinsViews.as_view()),
-    path('<int:pk>/detail', ProductMixinsViews.as_view()),
+    path('<int:pk>/detail', ProductMixinsViews.as_view(), name='product-detail'),
     path('<int:pk>/update', ProductMixinsViews.as_view()),
     path('<int:pk>/delete', ProductMixinsViews.as_view()),
     path('liste/', ProductMixinsViews.as_view()),

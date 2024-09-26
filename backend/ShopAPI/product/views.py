@@ -1,10 +1,9 @@
 from .models import Product, TokenExtension
-from django.forms.models import model_to_dict
 
 from rest_framework.response import Response
 from .serializers import ProductSerializers
 from rest_framework import generics, mixins, permissions, authentication
-from .permissions import IsStaffPermission
+from api.mixins import StaffEditorPermissionMixins
 from .authentication import TokenAuthentication
 from rest_framework.authtoken.views import ObtainAuthToken
 from .models import Token
@@ -89,6 +88,7 @@ class CustomAuthToken(ObtainAuthToken):
         })
        
 class ProductMixinsViews(
+        StaffEditorPermissionMixins,
         generics.GenericAPIView,
         mixins.CreateModelMixin,
         mixins.UpdateModelMixin,
@@ -98,23 +98,23 @@ class ProductMixinsViews(
     
     queryset = Product.objects.all()
     serializer_class = ProductSerializers
-    permission_classes = [permissions.IsAdminUser, IsStaffPermission]
-    authentication_classes = [authentication.SessionAuthentication, 
-                              TokenAuthentication]
+    
+ 
     def perform_update(self, serializer): 
         name = serializer.validated_data.get('name')
         content = serializer.validated_data.get('content') or None
         if content is None: 
-            content = name
-            
+            content = name    
         serializer.save(content=content)
+        
     def perform_create(self, serializer):
-         name = serializer.validated_data.get('name')
-         content = serializer.validated_data.get('content') or None
-         if content is None:
-             content = name
-         
-         serializer.save(content=content)
+        # email = serializer.validated_data.pop('email')
+        name = serializer.validated_data.get('name')
+        content = serializer.validated_data.get('content') or None
+        if content is None:
+            content = name
+        serializer.save(content=content)
+        
     def get(self, request, *args, **kwargs):
         pk = kwargs.get('pk')
         if pk is not None:
