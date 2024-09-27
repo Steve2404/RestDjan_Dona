@@ -3,7 +3,7 @@ from .models import Product, TokenExtension
 from rest_framework.response import Response
 from .serializers import ProductSerializers
 from rest_framework import generics, mixins, permissions, authentication
-from api.mixins import StaffEditorPermissionMixins
+from api.mixins import StaffEditorPermissionMixins, UserQuerySetMixins
 from .authentication import TokenAuthentication
 from rest_framework.authtoken.views import ObtainAuthToken
 from .models import Token
@@ -89,6 +89,7 @@ class CustomAuthToken(ObtainAuthToken):
        
 class ProductMixinsViews(
         StaffEditorPermissionMixins,
+        # UserQuerySetMixins,
         generics.GenericAPIView,
         mixins.CreateModelMixin,
         mixins.UpdateModelMixin,
@@ -100,12 +101,14 @@ class ProductMixinsViews(
     serializer_class = ProductSerializers
     
  
+    
+        
     def perform_update(self, serializer): 
         name = serializer.validated_data.get('name')
         content = serializer.validated_data.get('content') or None
         if content is None: 
             content = name    
-        serializer.save(content=content)
+        serializer.save(content=content, user=self.request.user)
         
     def perform_create(self, serializer):
         # email = serializer.validated_data.pop('email')
@@ -113,7 +116,7 @@ class ProductMixinsViews(
         content = serializer.validated_data.get('content') or None
         if content is None:
             content = name
-        serializer.save(content=content)
+        serializer.save(content=content, user=self.request.user)
         
     def get(self, request, *args, **kwargs):
         pk = kwargs.get('pk')
